@@ -7,8 +7,6 @@ import com.example.crypto.responseObjects.CoinWithCurrentPrice;
 import com.example.crypto.service.CoinService;
 import com.example.crypto.service.InfluxDBService;
 import com.google.gson.Gson;
-import com.influxdb.client.InfluxDBClient;
-import com.influxdb.client.write.Point;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -19,7 +17,10 @@ import org.testng.log4testng.Logger;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 import static com.example.crypto.endpoints.CoinGecko.*;
 
@@ -64,7 +65,7 @@ public class CoinController {
         return coinService.getCoin(id,response);
     }
 
-    public List<Coin> getCoinsList() throws IOException, InterruptedException {
+    public List<Coin> getCoinsList() throws IOException{
         //TODO:Simplify
         UriComponents uriComponents = UriComponentsBuilder
                 .newInstance()
@@ -95,66 +96,24 @@ public class CoinController {
         String url=uriComponents.toUriString();
 
         //TODO:Seperate util to make requests
-        List<MarketData> response= List.of(webClient.get()
+        List<MarketData> response= List.of(Objects.requireNonNull(webClient.get()
                 .uri(url)
                 .retrieve()
                 .bodyToMono(MarketData[].class).onErrorContinue((e, i) -> {
                     log.error("error");
                 })
-                .block());
+                .block()));
+
 
 
         log.info(response.size());
-        for(MarketData md:response){
+        for (MarketData md : response) {
             log.info(md.getName());
             log.info(md.getCurrent_price());
         }
 
+
         return response;
-    }
-
-    public Map<String, Map<Long, BigDecimal>> getCoinBoard(boolean updateNowFlag,List<String> ids) throws IOException, InterruptedException {
-        if(updateNowFlag) {
-
-            int numberOfCoins = ids.size();
-            List<CoinModel> coinModels=new ArrayList<>();
-            for (int i = 0; i < numberOfCoins;) {
-                Thread.sleep(2 * 60 * 1000);
-                for (int j = 0; j < 10; j++) {
-                    if(numberOfCoins-i==0){
-                        break;
-                    }
-                    try {
-                        CoinWithCurrentPrice coin=(getCoin(ids.get(i)));
-                        coinModels.add(convertCoinWithCurrentPriceToCoinModel(coin));
-                        log.info("Coins scanned " + i + " out of " + numberOfCoins);
-
-                    }catch (IOException e){
-                        log.error("Exception!: ",e);
-                        log.info("retrying request");
-                        Thread.sleep(2*60*1000);
-                        i--;
-                        j--;
-                    }
-                    if(coinModels.size()>=100){
-                        influxDBService.updateDbWithLatestBatchCoinPrice(coinModels);
-                        coinModels.clear();
-                    }
-                    i++;
-                }
-            }
-        }
-
-        return coinService.getCoinBoard();
-    }
-
-    public Map<String, Map<Long, BigDecimal>> getNCoinsCoinBoard(int start,int end) throws IOException, InterruptedException {
-        List<Coin> coins = getCoinsList().subList(start,end);
-        List<String> ids=new ArrayList<>();
-        for(Coin coin:coins){
-            ids.add(coin.getId());
-        }
-       return getCoinBoard(true,ids);
     }
 
     public void updateMarketCoinPrices() throws InterruptedException {
