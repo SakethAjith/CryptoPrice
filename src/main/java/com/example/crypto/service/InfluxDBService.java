@@ -17,6 +17,7 @@ import org.testng.log4testng.Logger;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -121,6 +122,32 @@ public class InfluxDBService {
             }
         }
         return price;
+    }
+
+    public Map<Instant,BigDecimal> retrieveCoinPriceHistoryFromDb(String name, Integer historyFrom){
+        ZonedDateTime input=ZonedDateTime.now();
+        Instant start= input.minusDays(historyFrom).toInstant();
+
+        log.info("start value = "+start+"last updated value ="+start);
+        String flux="from(bucket: \"CryptoBucket\") |> range(start: "+start+")"+
+                "|> filter(fn: (r)=>r._measurement ==\"CoinModel\")\n" +
+                "|> filter(fn: (r)=>r._field == \"price\")"+
+                "|> filter(fn: (r)=>r[\"name\"] == \""+name+"\")";
+
+        QueryApi queryApi=influxDBClient.getQueryApi();
+        List<FluxTable> tables = queryApi.query(flux);
+        Map<Instant,BigDecimal> prices=new HashMap<>();
+        for(FluxTable fluxTable:tables){
+            List<FluxRecord> records=fluxTable.getRecords();
+            for(FluxRecord record:records){
+//                log.info(record.getValues());
+                log.info(record.getTime());
+                log.info(record.getValue());
+                prices.put(record.getTime(),new BigDecimal((Double) record.getValue()));
+//                price=new BigDecimal((Double) record.getValue());
+            }
+        }
+        return prices;
     }
 
 

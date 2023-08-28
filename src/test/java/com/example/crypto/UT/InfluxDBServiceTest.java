@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.Map;
 
 @SpringBootTest
 public class InfluxDBServiceTest {
@@ -23,5 +25,11 @@ public class InfluxDBServiceTest {
     public void retrieveLatestCoinPriceFromDbTest(){
         BigDecimal price=influxDBService.retrieveLatestCoinPriceFromDb("bitcoin");
         Assert.assertNotNull(price);
+    }
+
+    @Test
+    public void retrieveCoinPriceHistoryFromDbTest(){
+        Map<Instant,BigDecimal> priceHistory=influxDBService.retrieveCoinPriceHistoryFromDb("bitcoin",2);
+        Assert.assertNotNull(priceHistory);
     }
 }
