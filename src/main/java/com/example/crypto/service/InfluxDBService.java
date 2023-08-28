@@ -55,7 +55,7 @@ public class InfluxDBService {
 
     public Map<String, Map<Long, BigDecimal>> retrieveFromDb(){
         ZonedDateTime input=ZonedDateTime.now();
-        Instant start= input.minusWeeks(1).toInstant();
+        Instant start= input.minusDays(1).toInstant();
 
         log.info("start value = "+start+"last updated value ="+start);
         String flux="from(bucket: \"CryptoBucket\") |> range(start: "+start+")";
