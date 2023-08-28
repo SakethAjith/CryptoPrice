@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 
 import static com.example.crypto.controller.CoinController.CURRENCY;
+import static java.lang.Math.ceil;
+
 @Service
 public class InfluxDBService {
     public static final String PRICE="price";
@@ -55,10 +57,12 @@ public class InfluxDBService {
 
     public Map<String, Map<Long, BigDecimal>> retrieveFromDb(){
         ZonedDateTime input=ZonedDateTime.now();
-        Instant start= input.minusWeeks(1).toInstant();
+            Instant start= input.minusDays(2).toInstant();
 
         log.info("start value = "+start+"last updated value ="+start);
-        String flux="from(bucket: \"CryptoBucket\") |> range(start: "+start+")";
+        String flux="from(bucket: \"CryptoBucket\") |> range(start: "+start+")"+
+                "|> filter(fn: (r)=>r._measurement ==\"CoinModel\")\n" +
+                "|> filter(fn: (r)=>r._field == \"price\")";
         QueryApi queryApi=influxDBClient.getQueryApi();
         List<FluxTable> tables = queryApi.query(flux);
 
@@ -71,27 +75,54 @@ public class InfluxDBService {
                 String field=fluxRecord.getField();
 
                 if(measurement.equalsIgnoreCase(MODEL) && field.equalsIgnoreCase(PRICE)){
-                    log.info("Found!!");
-
                     BigDecimal price = new BigDecimal((Double) fluxRecord.getValue());
-                    log.info(price);
+                    if(price.intValue()>0) {
+                        log.info("Found!!");
 
-                    String name= (String) fluxRecord.getValues().get(COIN_NAME);
-                    log.info(fluxRecord.getValues().get(COIN_NAME));
+                        String name = (String) fluxRecord.getValues().get(COIN_NAME);
+                        log.info(fluxRecord.getValues().get(COIN_NAME));
+                        log.info(price);
 
-                    Instant time= (Instant) fluxRecord.getValues().get(TIME);
-                    log.info(time);
+                        Instant time = (Instant) fluxRecord.getValues().get(TIME);
+                        log.info(time);
 
-                    if(!resultMap.containsKey(name)){
-                        Map<Long,BigDecimal> priceGraph=new HashMap<>();
-                        resultMap.put(name,priceGraph);
+                        if (!resultMap.containsKey(name)) {
+                            Map<Long, BigDecimal> priceGraph = new HashMap<>();
+                            resultMap.put(name, priceGraph);
+                        }
+                        resultMap.get(name).put(time.toEpochMilli(), price);
                     }
-                    resultMap.get(name).put(time.toEpochMilli(),price);
                 }
             }
         }
         return resultMap;
     }
+
+    public BigDecimal retrieveLatestCoinPriceFromDb(String name){
+        ZonedDateTime input=ZonedDateTime.now();
+        Instant start= input.minusDays(2).toInstant();
+
+        log.info("start value = "+start+"last updated value ="+start);
+        String flux="from(bucket: \"CryptoBucket\") |> range(start: "+start+")"+
+                "|> filter(fn: (r)=>r._measurement ==\"CoinModel\")\n" +
+                "|> filter(fn: (r)=>r._field == \"price\")"+
+                "|> filter(fn: (r)=>r[\"name\"] == \""+name+"\")"+
+                "|>last()";
+
+        QueryApi queryApi=influxDBClient.getQueryApi();
+        List<FluxTable> tables = queryApi.query(flux);
+        BigDecimal price=null;
+        for(FluxTable fluxTable:tables){
+            List<FluxRecord> records=fluxTable.getRecords();
+            for(FluxRecord record:records){
+                log.info(record.getValues());
+                log.info(record.getValue());
+                price=new BigDecimal((Double) record.getValue());
+            }
+        }
+        return price;
+    }
+
 
     public boolean checkDbConnection(){
         retrieveFromDb();
