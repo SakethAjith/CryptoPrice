@@ -17,10 +17,10 @@ import java.util.List;
 import java.util.Map;
 @Component
 public class InfluxDBDAOImpl implements InfluxDBDAO{
-    public static final String PRICE="price";
-    public static final String MODEL="CoinModel";
-    public static final String COIN_NAME="name";
-    public static final String TIME="_time";
+    private static final String PRICE="price";
+    private static final String MODEL="CoinModel";
+    private static final String COIN_NAME="name";
+    private static final String TIME="_time";
     Logger log = Logger.getLogger(InfluxDBDAOImpl.class);
     @Autowired
     InfluxDBClient influxDBClient;

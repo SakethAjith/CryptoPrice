@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 public class WebClientConfig {
 
-    public static final int TIMEOUT=5*60*1000;
+    private static final int TIMEOUT=5*60*1000;
 
     @Bean
     public WebClient webClientWithTimeOut(){

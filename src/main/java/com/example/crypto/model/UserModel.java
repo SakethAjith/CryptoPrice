@@ -14,9 +14,9 @@ import lombok.*;
 public class UserModel {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Id
-    String name;
+    private String name;
 
-    String id;
+    private String id;
 
 
 }

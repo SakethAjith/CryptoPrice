@@ -26,7 +26,7 @@ import static com.example.crypto.endpoints.CoinGecko.*;
 
 @Component
 public class CoinController {
-    public static final String CURRENCY="usd";
+    private static final String CURRENCY="usd";
     private static final int API_RATE_INTERVAL=2*60*1000;
     Logger log = Logger.getLogger(CoinController.class);
     @Autowired
