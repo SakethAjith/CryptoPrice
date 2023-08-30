@@ -18,6 +18,6 @@ public class CoinWithCurrentPrice {
         this.price=price;
     }
 
-    Coin coin;
-    BigDecimal price;
+    private Coin coin;
+    private BigDecimal price;
 }

@@ -15,12 +15,12 @@ import java.time.Instant;
 @Measurement(name = "CoinModel")
 public class CoinModel {
     @Column(tag = true)
-    String name;
+    private String name;
 
     @Column(tag = false)
-    BigDecimal price;
+    private BigDecimal price;
 
     @Column(timestamp = true)
-    Instant LastUpdated;
+    private Instant LastUpdated;
 
 }

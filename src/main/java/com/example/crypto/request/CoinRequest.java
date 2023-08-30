@@ -1,7 +1,7 @@
 package com.example.crypto.request;
 
 public class CoinRequest {
-    String name;
+    private String name;
 
-    String currency;
+    private String currency;
 }

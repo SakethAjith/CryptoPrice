@@ -2,7 +2,7 @@ package com.example.crypto.request;
 
 public class CoinGeckoRequest {
 
-    String ids;
+    private String ids;
 
-    String vs_currencies;
+    private String vs_currencies;
 }

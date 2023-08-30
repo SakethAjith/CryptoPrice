@@ -11,8 +11,8 @@ import java.math.BigDecimal;
 @Setter
 @NoArgsConstructor
 public class CoinRepository {
-    String name;
-    BigDecimal price;
+    private String name;
+    private BigDecimal price;
 
     public CoinRepository(String name, BigDecimal price) {
         this.name = name;

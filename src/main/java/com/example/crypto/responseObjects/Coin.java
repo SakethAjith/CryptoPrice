@@ -12,10 +12,10 @@ public class Coin {
         this.id = id;
     }
 
-    String id;
+    private String id;
 
-    String symbol;
+    private String symbol;
 
-    String name;
+    private String name;
 
 }

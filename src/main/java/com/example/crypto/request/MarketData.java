@@ -8,8 +8,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class MarketData {
-    String id;
-    String name;
-    String symbol;
-    String current_price;
+    private String id;
+    private String name;
+    private String symbol;
+    private String current_price;
 }
